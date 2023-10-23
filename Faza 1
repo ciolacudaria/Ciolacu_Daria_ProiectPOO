@@ -1,0 +1,238 @@
+//Domeniul ales este comanda.
+
+#include<iostream>
+using namespace std;
+
+class Magazin {
+public:
+	static string localizare;
+	const int idMagazin;
+	char* numeMagazin;
+	string adresa;
+	int numarProduseVandute;
+	string* produseVandute;
+
+	Magazin() :idMagazin(1) {
+		this->numeMagazin = new char[strlen("No Name") + 1];
+		strcpy_s(numeMagazin, strlen("No Name") + 1, "No Name");
+		this->adresa = "Lume";
+		this->numarProduseVandute = 0;
+		this->produseVandute = NULL;
+	}
+
+	Magazin(int idMagazin, char* numeMagazin, string adresa, int numarProduseVandute, string* produseVandute) :idMagazin(idMagazin) {
+		int i;
+		this->numeMagazin = new char[strlen(numeMagazin) + 1];
+		this->numeMagazin = numeMagazin;
+		this->adresa = adresa;
+		this->numarProduseVandute = numarProduseVandute;
+		this->produseVandute = new string[numarProduseVandute];
+		for (i = 0; i < numarProduseVandute; i++)
+			this->produseVandute[i] = produseVandute[i];
+	}
+
+	Magazin(string adresa) :idMagazin(25) {
+		this->numeMagazin = new char[strlen("No Name") + 1];
+		strcpy_s(numeMagazin, strlen("No Name") + 1, "No Name");
+		this->adresa = adresa;
+		this->numarProduseVandute = 0;
+		this->produseVandute = NULL;
+	}
+
+	~Magazin() {
+		if (numeMagazin != NULL)
+			delete[]this->numeMagazin;
+		if (produseVandute != NULL)
+			delete[]this->produseVandute;
+	}
+
+	void afisare() {
+		int i;
+		cout << "Magazinul " << numeMagazin << " are id-ul " << idMagazin << ", se afla la adresa din strada " << adresa << ", pe planeta "<<localizare<<" si vinde urmatoarele produse: "<< endl;
+		if (this->numarProduseVandute == 0)
+			cout << "-";
+		else {
+			for (i = 0; i < numarProduseVandute; i++)
+				cout << produseVandute[i] << " ";
+		}
+		cout <<"."<< endl;
+	}
+
+	void modificaLocalizare(string localizare) {
+		this->localizare = localizare;
+	}
+};
+
+string Magazin::localizare = "Pamant";
+
+class Client {
+public:
+	static int numarClienti;
+	const int idClient;
+	string numeClient;
+	int numarProduseComandate;
+	string* produseComandate;
+	int* cantitatiProduseComandate;
+	bool tipClient;
+
+	Client() :idClient(++numarClienti) {
+		this->numeClient = "NoName";
+		this->numarProduseComandate = 0;
+		this->produseComandate = NULL;
+		this->cantitatiProduseComandate = NULL;
+		this->tipClient = true;
+	}
+
+	Client(string numeClient, int numarProduseComandate, string* produseComandate, int* cantitatiProduseComandate) :idClient(++numarClienti) {
+		int i;
+		this->numeClient = numeClient;
+		this->numarProduseComandate = numarProduseComandate;
+		this->produseComandate = new string[numarProduseComandate];
+		for (i = 0; i < numarProduseComandate; i++)
+			this->produseComandate[i] = produseComandate[i];
+		this->cantitatiProduseComandate = new int[numarProduseComandate];
+		for (i = 0; i < numarProduseComandate; i++)
+			this->cantitatiProduseComandate[i] = cantitatiProduseComandate[i];
+		tipClient = true;
+	}
+
+	Client(string numeClient, bool tipClient) :idClient(++numarClienti) {
+		this->numeClient = numeClient;
+		numarProduseComandate = 0;
+		cantitatiProduseComandate = NULL;
+		this->tipClient = tipClient;
+	}
+
+	~Client() {
+		if (produseComandate != NULL)
+			delete[]this->produseComandate;
+		if (cantitatiProduseComandate != NULL)
+			delete[]this->cantitatiProduseComandate;
+	}
+
+	void afisare() {
+		int i;
+		cout << "Clientul " << numeClient<<", are id - ul " << idClient << ", a comandat " << numarProduseComandate << " produse: ";
+		if (this->numarProduseComandate == 0)
+			cout << "-";
+		else {
+			for (i = 0; i < numarProduseComandate; i++)
+				cout << produseComandate[i] << " ";
+			cout << ", in urmatoarele cantitati: ";
+			for (i = 0; i < numarProduseComandate; i++)
+				cout << cantitatiProduseComandate[i] << " ";
+		}
+		if (this->tipClient == true)
+			cout << ". Clientul este persoana fizica.";
+		else
+			cout<<". Clientul este persoana juridica." ;
+		cout << "In total, sunt " << numarClienti << " clienti." << endl;
+
+	}
+
+	int getIdClientUrmator() {
+		return numarClienti++;
+	}
+};
+
+int Client::numarClienti = 0;
+
+class ProdusComandat {
+public:
+	static int nrProduseComandate;
+	const int idProdus;
+	char* numeProdus;
+	string numeMagazin;
+	float pretProdus;
+	int cantitateDisponibila;
+	float greutateProdus;
+
+	ProdusComandat() :idProdus(1) {
+		this->numeProdus = new char[strlen("No Name") + 1];
+		strcpy_s(numeProdus, strlen("No Name") + 1, "No Name");
+		this->numeMagazin = "NO NAME";
+		this->pretProdus = 0.0;
+		this->cantitateDisponibila = 0;
+		this->greutateProdus = 0.0;
+		nrProduseComandate++;
+	}
+
+	ProdusComandat(int idProdus, char* numeProdus, string numeMagazin, float pretProdus, int cantitateDisponibila, float greutateProdus) :idProdus(idProdus) {
+		this->numeProdus = new char[strlen(numeProdus) + 1];
+		this->numeProdus = numeProdus;
+		this->numeMagazin = numeMagazin;
+		this->pretProdus = pretProdus;
+		this->cantitateDisponibila = cantitateDisponibila;
+		this->greutateProdus = greutateProdus;
+		nrProduseComandate++;
+	}
+
+	ProdusComandat(float pretProdus, int cantitateDisponibila) :idProdus(14) {
+		this->numeProdus = new char[strlen("No Name") + 1];
+		strcpy_s(numeProdus, strlen("No Name") + 1, "No Name");
+		this->numeMagazin = "NO NAME";
+		this->pretProdus = pretProdus;
+		this->cantitateDisponibila = cantitateDisponibila;
+		this->greutateProdus = 4.0;
+		nrProduseComandate++;
+	}
+
+	~ProdusComandat() {
+		if (numeProdus != NULL)
+			delete[]this->numeProdus;
+	}
+
+	void afisare() {
+		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul "<<numeMagazin<<". In total au fost inregistrate "<<nrProduseComandate<<" produse." << endl;
+	}
+
+	int cateProduseComandate() {
+		return nrProduseComandate;
+	}
+};
+
+int ProdusComandat::nrProduseComandate = 0;
+void main() {
+	Magazin magazin1;
+	magazin1.afisare();
+
+	char* numemagazin = new char[strlen("Diverta") + 1];
+	strcpy_s(numemagazin, strlen("Diverta") + 1, "Diverta");
+	string* produseVandute = new string[3];
+	produseVandute[0] = "caiet";
+	produseVandute[1] = "manual";
+	produseVandute[2] = "pix";
+	Magazin magazin2(2, numemagazin, "Unirii",3, produseVandute);
+	magazin2.afisare();
+
+	Magazin magazin3("Doamnei");
+	magazin3.afisare();
+
+	Client client1;
+	client1.afisare();
+
+	string* produseComandate = new string[3];
+	produseComandate[0] = "caiet";
+	produseComandate[1] = "manual";
+	produseComandate[2] = "pix";
+	int* cantitateProduseComandate = new int[3];
+	cantitateProduseComandate[0] = 3;
+	cantitateProduseComandate[1] = 5;
+	cantitateProduseComandate[2] = 10;
+	Client client2("Ion", 3, produseComandate, cantitateProduseComandate);
+	client2.afisare();
+
+	Client client3("Bogdan", false);
+	client3.afisare();
+
+	ProdusComandat produs1;
+	produs1.afisare();
+
+	char* numeProdus = new char[strlen("Caiet") + 1];
+	strcpy_s(numeProdus, strlen("Caiet") + 1, "Caiet");
+	ProdusComandat produs2(31, numeProdus, "Diverta", 30.5, 15, 2.65);
+	produs2.afisare();
+
+	ProdusComandat produs3(25.6, 4);
+	produs3.afisare();
+}
