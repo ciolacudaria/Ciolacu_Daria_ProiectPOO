@@ -39,6 +39,7 @@ public:
 		this->produseVandute = NULL;
 	}
 
+
 	~Magazin() {
 		if (numeMagazin != NULL)
 			delete[]this->numeMagazin;
@@ -58,7 +59,7 @@ public:
 		cout <<"."<< endl;
 	}
 
-	static void modificaLocalizare(string localizareNOua) {
+	static void modificaLocalizare(string localizareNoua) {
 		localizare = localizareNoua;
 	}
 };
@@ -103,6 +104,7 @@ public:
 		this->tipClient = tipClient;
 	}
 
+
 	~Client() {
 		if (produseComandate != NULL)
 			delete[]this->produseComandate;
@@ -131,7 +133,7 @@ public:
 	}
 
 	static void getIdClientUrmator() {
-		cout<<"Clientul urmator va avea ID-ul"<< numarClienti++<<endl;
+		cout << "Clientul urmator o sa aiba ID-ul " << numarClienti+1 <<"."<< endl;
 	}
 };
 
@@ -146,6 +148,7 @@ public:
 	float pretProdus;
 	int cantitateDisponibila;
 	float greutateProdus;
+
 
 	ProdusComandat() :idProdus(1) {
 		this->numeProdus = new char[strlen("No Name") + 1];
@@ -177,6 +180,7 @@ public:
 		nrProduseComandate++;
 	}
 
+
 	~ProdusComandat() {
 		if (numeProdus != NULL)
 			delete[]this->numeProdus;
@@ -187,7 +191,7 @@ public:
 	}
 
 	static void cateProduseComandate() {
-		cout<<"In prezent au fost comandate "<< nrProduseComandate<<" produse."<<endl;
+		cout<<"In prezent au fost vandute " <<nrProduseComandate<<" produse."<<endl;
 	}
 };
 
@@ -235,4 +239,5 @@ void main() {
 
 	ProdusComandat produs3(25.6, 4);
 	produs3.afisare();
+
 }
