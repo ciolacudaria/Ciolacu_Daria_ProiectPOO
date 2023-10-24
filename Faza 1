@@ -58,8 +58,8 @@ public:
 		cout <<"."<< endl;
 	}
 
-	void modificaLocalizare(string localizare) {
-		this->localizare = localizare;
+	static void modificaLocalizare(string localizareNOua) {
+		localizare = localizareNoua;
 	}
 };
 
@@ -130,8 +130,8 @@ public:
 
 	}
 
-	int getIdClientUrmator() {
-		return numarClienti++;
+	static void getIdClientUrmator() {
+		cout<<"Clientul urmator va avea ID-ul"<< numarClienti++<<endl;
 	}
 };
 
@@ -186,8 +186,8 @@ public:
 		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul "<<numeMagazin<<". In total au fost inregistrate "<<nrProduseComandate<<" produse." << endl;
 	}
 
-	int cateProduseComandate() {
-		return nrProduseComandate;
+	static void cateProduseComandate() {
+		cout<<"In prezent au fost comandate "<< nrProduseComandate<<" produse."<<endl;
 	}
 };
 
