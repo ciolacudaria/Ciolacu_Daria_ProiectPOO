@@ -3,15 +3,17 @@
 #include<iostream>
 using namespace std;
 
+class ProdusComandat;
+
 class Magazin {
-public:
+private:
 	static string localizare;
 	const int idMagazin;
 	char* numeMagazin;
 	string adresa;
 	int numarProduseVandute;
 	string* produseVandute;
-
+public:
 	Magazin() :idMagazin(1) {
 		this->numeMagazin = new char[strlen("No Name") + 1];
 		strcpy_s(numeMagazin, strlen("No Name") + 1, "No Name");
@@ -23,12 +25,23 @@ public:
 	Magazin(int idMagazin, char* numeMagazin, string adresa, int numarProduseVandute, string* produseVandute) :idMagazin(idMagazin) {
 		int i;
 		this->numeMagazin = new char[strlen(numeMagazin) + 1];
-		this->numeMagazin = numeMagazin;
+		strcpy_s(this->numeMagazin, strlen(numeMagazin) + 1,numeMagazin);
 		this->adresa = adresa;
 		this->numarProduseVandute = numarProduseVandute;
 		this->produseVandute = new string[numarProduseVandute];
 		for (i = 0; i < numarProduseVandute; i++)
 			this->produseVandute[i] = produseVandute[i];
+	}
+
+	Magazin(const Magazin& m) :idMagazin(m.idMagazin) {
+		int i;
+		this->numeMagazin = new char[strlen(m.numeMagazin) + 1];
+		strcpy_s(this->numeMagazin, strlen(m.numeMagazin) + 1, m.numeMagazin);
+		this->adresa = m.adresa;
+		this->numarProduseVandute = m.numarProduseVandute;
+		this->produseVandute = new string[numarProduseVandute];
+		for (i = 0; i < numarProduseVandute; i++)
+			this->produseVandute[i] = m.produseVandute[i];
 	}
 
 	Magazin(string adresa) :idMagazin(25) {
@@ -39,12 +52,64 @@ public:
 		this->produseVandute = NULL;
 	}
 
-
 	~Magazin() {
 		if (numeMagazin != NULL)
 			delete[]this->numeMagazin;
 		if (produseVandute != NULL)
 			delete[]this->produseVandute;
+	}
+
+	static void setLocalizareMagazin(string localizare) {
+		Magazin::localizare = localizare;
+	}
+
+	static string getLocalizareMagazin() {
+		return Magazin::localizare;
+	}
+
+	const int getIdMagazin() {
+		return this->idMagazin;
+	}
+
+	void setNumeMagazin(char* numeMagazin) {
+		if (this->numeMagazin != NULL)
+			delete[]this->numeMagazin;
+		this->numeMagazin = new char[strlen(numeMagazin) + 1];
+		strcpy_s(this->numeMagazin, strlen(numeMagazin) + 1, numeMagazin);
+	}
+
+	char* getNumeMagazin() {
+		return this->numeMagazin;
+	}
+
+	void setAdresa(string adresa) {
+		this->adresa = adresa;
+	}
+
+	string getAdresa() {
+		return this->adresa;
+	}
+
+	void setNrProduseVandute(int nrProduseVandute, string* produseVandute)
+	{
+		if (nrProduseVandute != 0) {
+			int i;
+			this->numarProduseVandute = nrProduseVandute;
+			if (this->produseVandute != NULL)
+				delete[]this->produseVandute;
+			this->produseVandute = new string[this->numarProduseVandute];
+			for (i = 0; i < this->numarProduseVandute; i++)
+				this->produseVandute[i] = produseVandute[i];
+		}
+	}
+
+	int getNumarProduseVandute() {
+		return this->numarProduseVandute;
+	}
+
+	string getProduseVandute(int i) {
+		if (i >= 0 && i < this->numarProduseVandute)
+			return produseVandute[i];
 	}
 
 	void afisare() {
@@ -59,15 +124,19 @@ public:
 		cout <<"."<< endl;
 	}
 
-	static void modificaLocalizare(string localizareNoua) {
-		localizare = localizareNoua;
+	static void careEsteLocalizarea() {
+		cout<<"Magazinele se afla pe planeta "<<Magazin::localizare;
 	}
+
+	friend void AdaugaProdus(Magazin &magazin, string produs);
 };
 
 string Magazin::localizare = "Pamant";
 
+
+
 class Client {
-public:
+private:
 	static int numarClienti;
 	const int idClient;
 	string numeClient;
@@ -75,6 +144,7 @@ public:
 	string* produseComandate;
 	int* cantitatiProduseComandate;
 	bool tipClient;
+public:
 
 	Client() :idClient(++numarClienti) {
 		this->numeClient = "NoName";
@@ -97,6 +167,19 @@ public:
 		tipClient = true;
 	}
 
+	Client(const Client& c) :idClient(c.idClient) {
+		int i;
+		this->numeClient = c.numeClient;
+		this->numarProduseComandate = c.numarProduseComandate;
+		this->produseComandate = new string[numarProduseComandate];
+		for (i = 0; i < numarProduseComandate; i++)
+			this->produseComandate[i] = c.produseComandate[i];
+		this->cantitatiProduseComandate = new int[numarProduseComandate];
+		for (i = 0; i < numarProduseComandate; i++)
+			this->cantitatiProduseComandate[i] = c.cantitatiProduseComandate[i];
+		this->tipClient = c.tipClient;
+	}
+
 	Client(string numeClient, bool tipClient) :idClient(++numarClienti) {
 		this->numeClient = numeClient;
 		numarProduseComandate = 0;
@@ -110,6 +193,66 @@ public:
 			delete[]this->produseComandate;
 		if (cantitatiProduseComandate != NULL)
 			delete[]this->cantitatiProduseComandate;
+	}
+
+	static void setNumarClienti(int numarClienti) {
+		Client::numarClienti = numarClienti;
+	}
+
+	static int getNumarClienti() {
+		return Client::numarClienti;
+	}
+
+	const int getIdClient() {
+		return this->idClient;
+	}
+
+	void setNumeClient(string numeClient) {
+		this->numeClient = numeClient;
+	}
+
+	string getNumeClient() {
+		return this->numeClient;
+	}
+
+	void setNumarProduseComandate(int numarProduseComandate, string* produseComandate, int* cantitatiProduseComandate) {
+		if (numarProduseComandate != 0)
+		{
+			int i;
+			this->numarProduseComandate = numarProduseComandate;
+			if (this->produseComandate != NULL)
+				delete[]this->produseComandate;
+			this->produseComandate = new string[this->numarProduseComandate];
+			for (i = 0; i < this->numarProduseComandate; i++)
+				this->produseComandate[i] = produseComandate[i];
+			if (this->cantitatiProduseComandate != NULL)
+				delete[]this->cantitatiProduseComandate;
+			this->cantitatiProduseComandate = new int[this->numarProduseComandate];
+			for (i = 0; i < this->numarProduseComandate; i++)
+				this->cantitatiProduseComandate[i] = cantitatiProduseComandate[i];
+		}
+	}
+
+	int getNumarProduseComandate() {
+		return this->numarProduseComandate;
+	}
+
+	string getProduseComandate(int i) {
+		if (i >= 0 && i < this->numarProduseComandate)
+			return produseComandate[i];
+	}
+
+	int getCantitatiProduseComandate(int i) {
+		if (i >= 0 && i < this->numarProduseComandate)
+			return cantitatiProduseComandate[i];
+	}
+
+	void setTipClient(bool tipClient) {
+		this->tipClient = tipClient;
+	}
+
+	bool getTipClient() {
+		return this->tipClient;
 	}
 
 	void afisare() {
@@ -132,15 +275,18 @@ public:
 
 	}
 
-	static void getIdClientUrmator() {
-		cout << "Clientul urmator o sa aiba ID-ul " << numarClienti+1 <<"."<< endl;
+	static void afiseazaIdClientUrmator() {
+		cout << "Clientul urmator o sa aiba ID-ul " << Client::numarClienti+1 <<"."<< endl;
 	}
+	friend void inregistrareComandaNoua(Client &client, ProdusComandat &produs, int cantitate);
 };
 
 int Client::numarClienti = 0;
 
+
+
 class ProdusComandat {
-public:
+private:
 	static int nrProduseComandate;
 	const int idProdus;
 	char* numeProdus;
@@ -149,7 +295,7 @@ public:
 	int cantitateDisponibila;
 	float greutateProdus;
 
-
+public:
 	ProdusComandat() :idProdus(1) {
 		this->numeProdus = new char[strlen("No Name") + 1];
 		strcpy_s(numeProdus, strlen("No Name") + 1, "No Name");
@@ -162,11 +308,21 @@ public:
 
 	ProdusComandat(int idProdus, char* numeProdus, string numeMagazin, float pretProdus, int cantitateDisponibila, float greutateProdus) :idProdus(idProdus) {
 		this->numeProdus = new char[strlen(numeProdus) + 1];
-		this->numeProdus = numeProdus;
+		strcpy_s(this->numeProdus, strlen(numeProdus) + 1, numeProdus);
 		this->numeMagazin = numeMagazin;
 		this->pretProdus = pretProdus;
 		this->cantitateDisponibila = cantitateDisponibila;
 		this->greutateProdus = greutateProdus;
+		nrProduseComandate++;
+	}
+
+	ProdusComandat(const ProdusComandat& p) :idProdus(p.idProdus) {
+		this->numeProdus = new char[strlen(p.numeProdus) + 1];
+		strcpy_s(this->numeProdus, strlen(p.numeProdus) + 1, p.numeProdus);
+		this->numeMagazin = p.numeMagazin;
+		this->pretProdus = p.pretProdus;
+		this->cantitateDisponibila = p.cantitateDisponibila;
+		this->greutateProdus = p.greutateProdus;
 		nrProduseComandate++;
 	}
 
@@ -186,17 +342,116 @@ public:
 			delete[]this->numeProdus;
 	}
 
+	static void setnrProduseComandate(int nrProduseComandate) {
+		ProdusComandat::nrProduseComandate = nrProduseComandate;
+	}
+
+	static int getNrProduseComandate() {
+		return ProdusComandat::nrProduseComandate;
+	}
+
+	const int getIdProdus() {
+		return this->idProdus;
+	}
+
+	void setNumeProdus(char* numeProdus) {
+		if (this->numeProdus != NULL)
+			delete[]this->numeProdus;
+		this->numeProdus = new char[strlen(numeProdus) + 1];
+		strcpy_s(this->numeProdus, strlen(numeProdus) + 1, numeProdus);
+	}
+
+	char* getNumeProdus() {
+		return this->numeProdus;
+	}
+
+	void setNumeMagazin(string numeMagazin) {
+		this->numeMagazin = numeMagazin;
+	}
+
+	string getNumeMagazin() {
+		return this->numeMagazin;
+	}
+
+	void setPretProdus(float pretProdus) {
+		this->pretProdus = pretProdus;
+	}
+
+	float getPretProdus() {
+		return this->pretProdus;
+	}
+
+	void setCantitateDisponibila(int cantitateDisponibila) {
+		this->cantitateDisponibila = cantitateDisponibila;
+	}
+
+	int getCantitateDisponibila() {
+		return this->cantitateDisponibila;
+	}
+
+	void setGreutateProdus(float greutateProdus) {
+		this->greutateProdus = greutateProdus;
+	}
+
+	float getGreutateProdus() {
+		return this->greutateProdus;
+	}
+
 	void afisare() {
-		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul "<<numeMagazin<<". In total au fost inregistrate "<<nrProduseComandate<<" produse." << endl;
+		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul " << numeMagazin << ". In total au fost inregistrate " << nrProduseComandate << " produse." << endl;
 	}
 
 	static void cateProduseComandate() {
-		cout<<"In prezent au fost vandute " <<nrProduseComandate<<" produse."<<endl;
+		cout << "In prezent au fost comandate " << ProdusComandat::nrProduseComandate << " produse." << endl;
 	}
+
+	friend void inregistrareComandaNoua(Client& client, ProdusComandat &produs, int cantitate);
 };
 
 int ProdusComandat::nrProduseComandate = 0;
-void main() {
+
+
+
+void inregistrareComandaNoua(Client &client, ProdusComandat &produs, int cantitate)
+{
+	string* aux = new string[client.numarProduseComandate + 1];
+	int* cantitati = new int[client.numarProduseComandate + 1];
+	int i;
+	for (i = 0; i < client.numarProduseComandate; i++)
+		aux[i] = client.produseComandate[i];
+	aux[client.numarProduseComandate] = produs.numeProdus;
+	delete[]client.produseComandate;
+	client.produseComandate = aux;
+
+	for (i = 0; i < client.numarProduseComandate; i++)
+		cantitati[i] = client.cantitatiProduseComandate[i];
+	cantitati[client.numarProduseComandate] = cantitate;
+	delete[]client.cantitatiProduseComandate;
+	client.cantitatiProduseComandate = cantitati;
+	client.numarProduseComandate++;
+	produs.cantitateDisponibila = produs.cantitateDisponibila - cantitate;
+
+	cout << "Clientul " << client.numeClient << " a comandat un nou produs " << produs.numeProdus << " ce are pretul de " << produs.pretProdus << " lei, in numar de " << cantitate << " bucati.Dupa comanda, au mai ramas in stoc " << produs.cantitateDisponibila << " bucati." << endl;
+}
+
+
+
+void AdaugaProdus(Magazin& magazin, string produs)
+{
+	string* aux = new string[magazin.numarProduseVandute + 1];
+	int i;
+	for (i = 0; i < magazin.numarProduseVandute; i++)
+		aux[i] = magazin.produseVandute[i];
+	aux[magazin.numarProduseVandute] = produs;
+	delete[]magazin.produseVandute;
+	magazin.numarProduseVandute++;
+	magazin.produseVandute = aux;
+}
+
+
+
+void main() 
+{
 	Magazin magazin1;
 	magazin1.afisare();
 
@@ -208,15 +463,18 @@ void main() {
 	produseVandute[2] = "pix";
 	Magazin magazin2(2, numemagazin, "Unirii",3, produseVandute);
 	magazin2.afisare();
+	delete[]numemagazin;
+	delete[]produseVandute;
 
 	Magazin magazin3("Doamnei");
 	magazin3.afisare();
+
 
 	Client client1;
 	client1.afisare();
 
 	string* produseComandate = new string[3];
-	produseComandate[0] = "caiet";
+	produseComandate[0] = "carte";
 	produseComandate[1] = "manual";
 	produseComandate[2] = "pix";
 	int* cantitateProduseComandate = new int[3];
@@ -225,6 +483,9 @@ void main() {
 	cantitateProduseComandate[2] = 10;
 	Client client2("Ion", 3, produseComandate, cantitateProduseComandate);
 	client2.afisare();
+	delete[]produseComandate;
+	delete[]cantitateProduseComandate;
+
 
 	Client client3("Bogdan", false);
 	client3.afisare();
@@ -232,12 +493,88 @@ void main() {
 	ProdusComandat produs1;
 	produs1.afisare();
 
-	char* numeProdus = new char[strlen("Caiet") + 1];
-	strcpy_s(numeProdus, strlen("Caiet") + 1, "Caiet");
+	char* numeProdus = new char[strlen("caiet") + 1];
+	strcpy_s(numeProdus, strlen("caiet") + 1, "caiet");
 	ProdusComandat produs2(31, numeProdus, "Diverta", 30.5, 15, 2.65);
 	produs2.afisare();
+	delete[]numeProdus;
 
 	ProdusComandat produs3(25.6, 4);
 	produs3.afisare();
 
+
+	inregistrareComandaNoua(client2, produs2,2);
+	client2.afisare();
+	produs2.afisare();
+
+
+	AdaugaProdus(magazin3, "Revista");
+	magazin3.afisare();
+
+
+	magazin1.setLocalizareMagazin("Marte");
+	char* numemagazin1 = new char[strlen("Mango") + 1];
+	strcpy_s(numemagazin1, strlen("Mango") + 1, "Mango");
+	magazin1.setNumeMagazin(numemagazin1);
+	magazin1.setAdresa("Calea Vitan");
+	string* produseVandute1 = new string[4];
+	produseVandute1[0] = "fusta";
+	produseVandute1[1] = "rochie";
+	produseVandute1[2] = "pantalon";
+	produseVandute1[3] = "tricou";
+	magazin1.setNrProduseVandute(4, produseVandute1);
+	int i;
+	cout << "Magazinul " << magazin1.getNumeMagazin() << " are id-ul " << magazin1.getIdMagazin() << ", se afla la adresa din strada " << magazin1.getAdresa() << ", pe planeta " << magazin1.getLocalizareMagazin()<< " si vinde urmatoarele produse: " << endl;
+	if (magazin1.getNumarProduseVandute() == 0)
+		cout << "-";
+	else {
+		for (i = 0; i < magazin1.getNumarProduseVandute(); i++)
+			cout << magazin1.getProduseVandute(i) << " ";
+	}
+	cout << "." << endl;
+	delete[]numemagazin1;
+	delete[]produseVandute1;
+
+
+	client1.setNumarClienti(1);
+	client1.setNumeClient("Ioana Avram");
+	string* produseComandate1 = new string[3];
+	produseComandate1[0] = "crema de ochi";
+	produseComandate1[1] = "demachiant";
+	produseComandate1[2] = "ruj";
+	int* cantitateProduseComandate1 = new int[3];
+	cantitateProduseComandate1[0] = 1;
+	cantitateProduseComandate1[1] = 3;
+	cantitateProduseComandate1[2] = 2;
+	client1.setNumarProduseComandate(3, produseComandate1, cantitateProduseComandate1);
+	client1.setTipClient(true);
+	cout << "Clientul " << client1.getNumeClient() << ", are id - ul " << client1.getIdClient() << ", a comandat " << client1.getNumarProduseComandate() << " produse: ";
+	if (client1.getNumarProduseComandate() == 0)
+		cout << "-";
+	else {
+		for (i = 0; i < client1.getNumarProduseComandate(); i++)
+			cout << client1.getProduseComandate(i) << " ";
+		cout << ", in urmatoarele cantitati: ";
+		for (i = 0; i < client1.getNumarProduseComandate(); i++)
+			cout << client1.getCantitatiProduseComandate(i) << " ";
+	}
+	if (client1.getTipClient() == true)
+		cout << ". Clientul este persoana fizica.";
+	else
+		cout << ". Clientul este persoana juridica.";
+	cout << "In total, sunt " << client1.getNumarClienti() << " clienti." << endl;
+	delete[]produseComandate1;
+	delete[]cantitateProduseComandate1;
+
+
+	produs1.setnrProduseComandate(1);
+	char* numeProdus1 = new char[strlen("crema") + 1];
+	strcpy_s(numeProdus1, strlen("crema") + 1, "crema");
+	produs1.setNumeProdus(numeProdus1);
+	produs1.setNumeMagazin("Bebe Tei");
+	produs1.setPretProdus(30.5);
+	produs1.setCantitateDisponibila(10);
+	produs1.setGreutateProdus(0.30);
+	cout << "Produsul " << produs1.getNumeProdus() << " are id-ul " << produs1.getIdProdus() << ", pretul de " << produs1.getPretProdus() << " lei si greutatea de " << produs1.getGreutateProdus() << " kg. El este disponibil in numar de " << produs1.getCantitateDisponibila()<< " bucati si este distribuit de magazinul " << produs1.getNumeMagazin()<< ". In total au fost inregistrate " << produs1.getNrProduseComandate() << " produse." << endl;
+	delete[]numeProdus1;
 }
