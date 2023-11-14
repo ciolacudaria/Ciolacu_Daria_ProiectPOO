@@ -2,10 +2,11 @@
 
 #include<iostream>
 using namespace std;
+using namespace std;
 
 class ProdusComandat;
 
-class Magazin 
+class Magazin
 {
 private:
 	static string localizare;
@@ -15,7 +16,7 @@ private:
 	int numarProduseVandute;
 	string* produseVandute;
 public:
-	Magazin() :idMagazin(1) 
+	Magazin() :idMagazin(1)
 	{
 		this->numeMagazin = new char[strlen("No Name") + 1];
 		strcpy_s(numeMagazin, strlen("No Name") + 1, "No Name");
@@ -27,7 +28,7 @@ public:
 	Magazin(int idMagazin, char* numeMagazin, string adresa, int numarProduseVandute, string* produseVandute) :idMagazin(idMagazin) {
 		int i;
 		this->numeMagazin = new char[strlen(numeMagazin) + 1];
-		strcpy_s(this->numeMagazin, strlen(numeMagazin) + 1,numeMagazin);
+		strcpy_s(this->numeMagazin, strlen(numeMagazin) + 1, numeMagazin);
 		this->adresa = adresa;
 		this->numarProduseVandute = numarProduseVandute;
 		this->produseVandute = new string[numarProduseVandute];
@@ -116,21 +117,21 @@ public:
 
 	void afisare() {
 		int i;
-		cout << "Magazinul " << numeMagazin << " are id-ul " << idMagazin << ", se afla la adresa din strada " << adresa << ", pe planeta "<<localizare<<" si vinde urmatoarele produse: "<< endl;
+		cout << "Magazinul " << numeMagazin << " are id-ul " << idMagazin << ", se afla la adresa din strada " << adresa << ", pe planeta " << localizare << " si vinde urmatoarele produse: " << endl;
 		if (this->numarProduseVandute == 0)
 			cout << "-";
 		else {
 			for (i = 0; i < numarProduseVandute; i++)
 				cout << produseVandute[i] << " ";
 		}
-		cout <<"."<< endl;
+		cout << "." << endl;
 	}
 
 	static void careEsteLocalizarea() {
-		cout<<"Magazinele se afla pe planeta "<<Magazin::localizare;
+		cout << "Magazinele se afla pe planeta " << Magazin::localizare;
 	}
 
-	friend void AdaugaProdus(Magazin &magazin, string produs);
+	friend void AdaugaProdus(Magazin& magazin, string produs);
 
 
 	const Magazin& operator=(const Magazin& magazin)
@@ -158,21 +159,45 @@ public:
 			return this->produseVandute[i];
 	}
 
-	friend ostream& operator<<(ostream & monitor, const Magazin & magazin)
+	friend ostream& operator<<(ostream& monitor, const Magazin& magazin)
 	{
 		int i;
 		monitor << "Magazinul " << magazin.numeMagazin << " are id-ul " << magazin.idMagazin << ", se afla la adresa din strada " << magazin.adresa << ", pe planeta " << magazin.localizare << " si vinde urmatoarele produse: " << endl;
 		if (magazin.numarProduseVandute == 0)
 			monitor << "-";
-		else 
+		else
 			for (i = 0; i < magazin.numarProduseVandute; i++)
 				monitor << magazin.produseVandute[i] << " ";
 		monitor << "." << endl;
 		return monitor;
 	}
 
+	friend istream& operator>>(istream& taste, Magazin& magazin)
+	{
+		char nume[100];
+		cout << "Numele magazinului este: ";
+		taste >> nume;
+		if (magazin.numeMagazin != NULL)
+			delete[]magazin.numeMagazin;
+		magazin.numeMagazin = new char[strlen(nume) + 1];
+		strcpy_s(magazin.numeMagazin, strlen(nume) + 1, nume);
+		cout << "Adresa magazinului este: ";
+		cin >> magazin.adresa;
+		cout << "Numarul de produse vandute este: ";
+		taste >> magazin.numarProduseVandute;
+		if (magazin.produseVandute != NULL)
+			delete[]magazin.produseVandute;
+		magazin.produseVandute = new string[magazin.numarProduseVandute];
+		for (int i = 0; i < magazin.numarProduseVandute; i++)
+		{
+			cout << "Produsul " << i + 1 << " este: ";
+			taste >> magazin.produseVandute[i];
+		}
+		return taste;
+	}
 
-	bool operator<(const Magazin & magazin)
+
+	bool operator<(const Magazin& magazin)
 	{
 		return this->numarProduseVandute < magazin.numarProduseVandute;
 	}
@@ -305,28 +330,28 @@ public:
 
 	void afisare() {
 		int i;
-		cout << "Clientul " << numeClient<<", are id-ul " << idClient << ", a comandat " << numarProduseComandate << " produse: ";
+		cout << "Clientul " << this->numeClient << ", are id-ul " << this->idClient << ", a comandat " << this->numarProduseComandate << " produse: ";
 		if (this->numarProduseComandate == 0)
 			cout << "-";
 		else {
-			for (i = 0; i < numarProduseComandate; i++)
-				cout << produseComandate[i] << " ";
+			for (i = 0; i < this->numarProduseComandate; i++)
+				cout << this->produseComandate[i] << " ";
 			cout << ", in urmatoarele cantitati: ";
-			for (i = 0; i < numarProduseComandate; i++)
-				cout << cantitatiProduseComandate[i] << " ";
+			for (i = 0; i < this->numarProduseComandate; i++)
+				cout << this->cantitatiProduseComandate[i] << " ";
 		}
 		if (this->tipClient == true)
 			cout << ". Clientul este persoana fizica.";
 		else
-			cout<<". Clientul este persoana juridica." ;
+			cout << ". Clientul este persoana juridica.";
 		cout << "In total, sunt " << numarClienti << " clienti." << endl;
 
 	}
 
 	static void afiseazaIdClientUrmator() {
-		cout << "Clientul urmator o sa aiba ID-ul " << Client::numarClienti+1 <<"."<< endl;
+		cout << "Clientul urmator o sa aiba ID-ul " << Client::numarClienti + 1 << "." << endl;
 	}
-	friend void inregistrareComandaNoua(Client &client, ProdusComandat &produs, int cantitate);
+	friend void inregistrareComandaNoua(Client& client, ProdusComandat& produs, int cantitate);
 
 	const Client& operator=(const Client& client) {
 		if (this != &client)
@@ -386,7 +411,7 @@ public:
 		if (client.cantitatiProduseComandate != NULL)
 			delete[]client.cantitatiProduseComandate;
 		client.cantitatiProduseComandate = new int[client.numarProduseComandate];
-		for (int i = 0; i <client.numarProduseComandate; i++)
+		for (int i = 0; i < client.numarProduseComandate; i++)
 		{
 			cout << "Cantitatea comandata din produsul " << i + 1 << " este: ";
 			taste >> client.cantitatiProduseComandate[i];
@@ -396,6 +421,27 @@ public:
 		taste >> client.tipClient;
 		return taste;
 
+	}
+
+	friend ostream& operator<<(ostream& monitor, const Client& client)
+	{
+		int i;
+		monitor << "Clientul " << client.numeClient << ", are id-ul " << client.idClient << ", a comandat " << client.numarProduseComandate << " produse: ";
+		if (client.numarProduseComandate == 0)
+			monitor << "-";
+		else {
+			for (i = 0; i < client.numarProduseComandate; i++)
+				monitor << client.produseComandate[i] << " ";
+			monitor << ", in urmatoarele cantitati: ";
+			for (i = 0; i < client.numarProduseComandate; i++)
+				monitor << client.cantitatiProduseComandate[i] << " ";
+		}
+		if (client.tipClient == true)
+			monitor << ". Clientul este persoana fizica.";
+		else
+			monitor << ". Clientul este persoana juridica.";
+		monitor << "In total, sunt " << client.numarClienti << " clienti." << endl;
+		return monitor;
 	}
 
 
@@ -529,10 +575,10 @@ public:
 		cout << "In prezent au fost comandate " << ProdusComandat::nrProduseComandate << " produse." << endl;
 	}
 
-	friend void inregistrareComandaNoua(Client& client, ProdusComandat &produs, int cantitate);
+	friend void inregistrareComandaNoua(Client& client, ProdusComandat& produs, int cantitate);
 
 
-	const ProdusComandat& operator=(const ProdusComandat& produs) 
+	const ProdusComandat& operator=(const ProdusComandat& produs)
 	{
 		if (this != &produs) {
 			if (this->numeProdus != NULL)
@@ -561,13 +607,39 @@ public:
 		return *this;
 	}
 
+	friend istream& operator>>(istream& taste, ProdusComandat& produs)
+	{
+		char nume[100];
+		cout << "Numele produsului este: ";
+		taste >> nume;
+		if (produs.numeProdus != NULL)
+			delete[]produs.numeProdus;
+		produs.numeProdus = new char[strlen(nume) + 1];
+		strcpy_s(produs.numeProdus, strlen(nume) + 1, nume);
+		cout << "Numele magazinului furnizor este: ";
+		taste >> produs.numeMagazin;
+		cout << "Pretul produsului este: ";
+		taste >> produs.pretProdus;
+		cout << "Greutatea prodsului este: ";
+		taste >> produs.greutateProdus;
+		cout << "Cantitate disponibila din produs: ";
+		taste >> produs.cantitateDisponibila;
+		return taste;
+	}
+
+	friend ostream& operator<<(ostream& monitor, const ProdusComandat& produs)
+	{
+		monitor << "Produsul " << produs.numeProdus << " are id-ul " << produs.idProdus << ", pretul de " << produs.pretProdus << " lei si greutatea de " << produs.greutateProdus << " kg. El este disponibil in numar de " << produs.cantitateDisponibila << " bucati si este distribuit de magazinul " << produs.numeMagazin << ". In total au fost inregistrate " << produs.nrProduseComandate << " produse." << endl;
+		return monitor;
+	}
+
 };
 
 int ProdusComandat::nrProduseComandate = 0;
 
 
 
-void inregistrareComandaNoua(Client &client, ProdusComandat &produs, int cantitate)
+void inregistrareComandaNoua(Client& client, ProdusComandat& produs, int cantitate)
 {
 	string* aux = new string[client.numarProduseComandate + 1];
 	int* cantitati = new int[client.numarProduseComandate + 1];
@@ -605,8 +677,9 @@ void AdaugaProdus(Magazin& magazin, string produs)
 
 
 
-void main() 
+void main()
 {
+	int i;
 	Magazin magazin1;
 	magazin1.afisare();
 
@@ -678,7 +751,6 @@ void main()
 	produseVandute1[2] = "pantalon";
 	produseVandute1[3] = "tricou";
 	magazin1.setNrProduseVandute(4, produseVandute1);
-	int i;
 	cout << "Magazinul " << magazin1.getNumeMagazin() << " are id-ul " << magazin1.getIdMagazin() << ", se afla la adresa din strada " << magazin1.getAdresa() << ", pe planeta " << magazin1.getLocalizareMagazin()<< " si vinde urmatoarele produse: " << endl;
 	if (magazin1.getNumarProduseVandute() == 0)
 		cout << "-";
@@ -767,7 +839,7 @@ void main()
 		cout << "Clientul"<<client2.getNumeClient()<<" a comandat de mai multe ori."<<endl;
 	else
 		cout << "Clientii sunt diferiti."<<endl;
-	
+
 
 	ProdusComandat produs4;
 	produs4 = produs2;
@@ -781,4 +853,37 @@ void main()
 	++produs3;
 	produs3.afisare();
 
+	Magazin* vectorMagazine = new Magazin[3];
+	for (i = 0; i < 3; i++)
+		cin >> vectorMagazine[i];
+	for (i = 0; i < 3; i++)
+		cout << vectorMagazine[i];
+	delete[]vectorMagazine;
+
+	Client* vectorClienti = new Client[2];
+	for (i = 0; i < 2; i++)
+		cin >> vectorClienti[i];
+	for (i = 0; i < 2; i++)
+		cout << vectorClienti[i];
+	delete[]vectorClienti;
+
+	ProdusComandat* vectorProduse = new ProdusComandat[4];
+	for (i = 0; i < 4; i++)
+		cin >> vectorProduse[i];
+	for (i = 0; i < 4; i++)
+		cout << vectorProduse[i];
+	delete[]vectorProduse;
+
+	ProdusComandat** matriceProduse = new ProdusComandat * [3];
+	for (i = 0; i < 3; i++)
+		matriceProduse[i] = new ProdusComandat[2];
+	for (i = 0; i < 3; i++)
+		for (int j = 0; j < 2; j++)
+			cin >> matriceProduse[i][j];
+	for (i = 0; i < 3; i++)
+		for (int j = 0; j < 2; j++)
+			cout << matriceProduse[i][j];
+	for (i = 0; i < 3; i++)
+		delete[]matriceProduse[i];
+	delete[]matriceProduse;
 }
