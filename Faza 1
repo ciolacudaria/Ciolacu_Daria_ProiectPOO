@@ -1,11 +1,11 @@
 //Domeniul ales este comanda.
 
 #include<iostream>
+#include<fstream>
 using namespace std;
 
 class ProdusComandat;
 class Furnizor;
-ostream& operator<<(ostream& ost, const Furnizor& f);
 
 class Magazin
 {
@@ -183,7 +183,7 @@ public:
 		magazin.numeMagazin = new char[strlen(nume) + 1];
 		strcpy_s(magazin.numeMagazin, strlen(nume) + 1, nume);
 		cout << "Adresa magazinului este: ";
-		cin >> magazin.adresa;
+		taste >> magazin.adresa;
 		cout << "Numarul de produse vandute este: ";
 		taste >> magazin.numarProduseVandute;
 		if (magazin.produseVandute != NULL)
@@ -203,9 +203,35 @@ public:
 		return this->numarProduseVandute < magazin.numarProduseVandute;
 	}
 
+	friend ofstream& operator<<(ofstream& out, const Magazin& magazin)
+	{
+		int i;
+		out << magazin.numeMagazin << endl << magazin.adresa << endl<<magazin.numarProduseVandute << endl;
+		for (i = 0; i < magazin.numarProduseVandute; i++)
+			out << magazin.produseVandute[i] <<endl;
+		out << endl;
+		return out;
+	}
+
+	friend ifstream& operator>>(ifstream& in, Magazin& magazin)
+	{
+		char nume[100];
+		in >> nume;
+		if (magazin.numeMagazin != NULL)
+			delete[]magazin.numeMagazin;
+		magazin.numeMagazin = new char[strlen(nume) + 1];
+		strcpy_s(magazin.numeMagazin, strlen(nume) + 1, nume);
+		in >> magazin.adresa;
+		in >> magazin.numarProduseVandute;
+		if (magazin.produseVandute != NULL)
+			delete[]magazin.produseVandute;
+		magazin.produseVandute = new string[magazin.numarProduseVandute];
+		for (int i = 0; i < magazin.numarProduseVandute; i++)
+			in >> magazin.produseVandute[i];
+		return in;
+	}
+
 	friend Furnizor;
-	friend ostream& operator<<(ostream& ost, const Furnizor& f);
-	friend istream& operator>>(istream& is, Furnizor& f);
 };
 
 string Magazin::localizare = "Pamant";
@@ -453,6 +479,60 @@ public:
 		return this->idClient == client.idClient && this->numeClient == client.numeClient;
 	}
 
+
+	void scrieInFisierBinar(fstream& f) {
+		const char* nume = this->numeClient.c_str();
+		int lungimeNume = this->numeClient.length();
+		f.write((char*)&lungimeNume, sizeof(int));
+		for (int i = 0; i < lungimeNume; i++)
+			f.write((char*)&nume[i], sizeof(char));
+		f.write((char*)&this->numarProduseComandate, sizeof(int));
+		const char** vectorProduse = new const char* [this->numarProduseComandate];
+		int* lungimeProduse = new int[this->numarProduseComandate];
+		for (int i = 0; i < this->numarProduseComandate; i++)
+		{
+			vectorProduse[i] = this->produseComandate[i].c_str();
+			lungimeProduse[i] = this->produseComandate[i].length();
+			f.write((char*)&lungimeProduse[i], sizeof(int));
+			for (int j = 0; j < lungimeProduse[i]; j++)
+				f.write((char*)&vectorProduse[i][j], sizeof(char));
+		}
+		for (int i = 0; i < this->numarProduseComandate; i++)
+			f.write((char*)&this->cantitatiProduseComandate[i], sizeof(int));
+		f.write((char*)&this->tipClient, sizeof(bool));
+	}
+
+	void citesteDinFisierBinar(fstream& f) {
+		int lungimeNume;
+		f.read((char*)&lungimeNume, sizeof(int));
+		char* nume = new char[lungimeNume + 1];
+		for (int i = 0; i < lungimeNume; i++)
+			f.read((char*)&nume[i], sizeof(char));
+		nume[lungimeNume] = '\0';
+		this->numeClient.assign(nume, lungimeNume + 1);
+		f.read((char*)&this->numarProduseComandate, sizeof(int));
+		if (this->produseComandate != NULL)
+			delete[]this->produseComandate;
+		this->produseComandate = new string[this->numarProduseComandate];
+		char** vectorProduse = new char* [this->numarProduseComandate];
+		int* lungimeProduse = new int[this->numarProduseComandate];
+		for (int i = 0; i < this->numarProduseComandate; i++) {
+			f.read((char*)&lungimeProduse[i], sizeof(int));
+			vectorProduse[i] = new char[lungimeProduse[i] + 1];
+			for (int j = 0; j < lungimeProduse[i]; j++)
+				f.read((char*)&vectorProduse[i][j], sizeof(char));
+			vectorProduse[i][lungimeProduse[i]] = '\0';
+		}
+		for (int i = 0; i < this->numarProduseComandate; i++)
+			this->produseComandate[i].assign(vectorProduse[i], lungimeProduse[i] + 1);
+		if (this->cantitatiProduseComandate != NULL)
+			delete[]this->cantitatiProduseComandate;
+		this->cantitatiProduseComandate = new int[this->numarProduseComandate];
+		for (int i = 0; i < this->numarProduseComandate; i++)
+			f.read((char*)&this->cantitatiProduseComandate[i], sizeof(int));
+		f.read((char*)&this->tipClient, sizeof(bool));
+	}
+
 };
 
 int Client::numarClienti = 0;
@@ -637,6 +717,44 @@ public:
 		return monitor;
 	}
 
+
+	void scrieInFisierBinar(fstream& f) {
+		int lungime = strlen(numeProdus);
+		f.write((char*)&lungime, sizeof(int));
+		for (int i = 0; i < lungime; i++)
+			f.write((char*)&this->numeProdus[i], sizeof(char));
+		int lungimeNume=this->numeMagazin.length();
+		const char* numeMagazin = this->numeMagazin.c_str();
+		f.write((char*)&lungimeNume, sizeof(int));
+		for (int i = 0; i < lungimeNume; i++)
+			f.write((char*)&numeMagazin[i], sizeof(char));
+		f.write((char*)&this->pretProdus, sizeof(float));
+		f.write((char*)&this->cantitateDisponibila, sizeof(int));
+		f.write((char*)&this->greutateProdus, sizeof(float));
+	}
+
+
+	void citireDinFisierBinar(fstream& f) {
+		int lungime;
+		f.read((char*)&lungime, sizeof(int));
+		if (this->numeProdus != NULL)
+			delete[]this->numeProdus;
+		this->numeProdus = new char[lungime + 1];
+		for (int i = 0; i < lungime; i++)
+			f.read((char*)&this->numeProdus[i], sizeof(char));
+		this->numeProdus[lungime] = '\0';
+		int lungimeNume;
+		f.read((char*)&lungimeNume, sizeof(int));
+		char* numeMagazin = new char[lungimeNume + 1];
+		for (int i = 0; i < lungimeNume; i++)
+			f.read((char*)&numeMagazin[i], sizeof(char));
+		numeMagazin[lungimeNume] = '\0';
+		this->numeMagazin.assign(numeMagazin, lungimeNume + 1);
+		f.read((char*)&this->pretProdus, sizeof(float));
+		f.read((char*)&this->cantitateDisponibila, sizeof(int));
+		f.read((char*)&this->greutateProdus, sizeof(float));
+	}
+
 };
 
 int ProdusComandat::nrProduseComandate = 0;
@@ -740,7 +858,7 @@ public:
 	}
 
 	friend ostream& operator<<(ostream& ost, const Furnizor& f) {
-		ost << "Furnizorul " << f.numeFurnizor << " are id-ul " << f.idFurnizor << " si furnizeaza " << f.numarProduseFurnizate << " produse pentru magazinul " << f.magazin.numeMagazin << ". El furnizeaza urmatoarele produse: ";
+		ost << "Furnizorul " << f.numeFurnizor << " are id-ul " << f.idFurnizor << " si furnizeaza " << f.numarProduseFurnizate << " produse pentru magazinul " << f.magazin.getNumeMagazin() << ". El furnizeaza urmatoarele produse: ";
 		for (int i = 0; i < f.numarProduseFurnizate; i++)
 			ost << f.produseFurnizate[i] << " ";
 		ost << ". " << endl;
@@ -762,6 +880,29 @@ public:
 
 	bool operator<(const Furnizor& f) {
 		return this->numarProduseFurnizate < f.numarProduseFurnizate;
+	}
+
+	friend ofstream& operator<<(ofstream& out, const Furnizor& f) {
+		out << f.numeFurnizor<<endl<<f.numarProduseFurnizate << endl<<f.magazin.getNumeMagazin()<<endl;
+		for (int i = 0; i < f.numarProduseFurnizate; i++)
+			out << f.produseFurnizate[i]<<endl;
+		out << endl;
+		return out;
+	}
+
+
+	friend ifstream& operator>>(ifstream& in, Furnizor& f) {
+		in >> f.numeFurnizor;
+		in >> f.numarProduseFurnizate;
+		char nume[100];
+		in >> nume;
+		f.magazin.setNumeMagazin(nume);
+		if (f.produseFurnizate != NULL)
+			delete[]f.produseFurnizate;
+		f.produseFurnizate = new string[f.numarProduseFurnizate];
+		for (int i = 0; i < f.numarProduseFurnizate; i++)
+			in >> f.produseFurnizate[i];
+		return in;
 	}
 };
 
@@ -805,9 +946,9 @@ void AdaugaProdus(Magazin& magazin, string produs)
 
 void main()
 {
-	//int i;
-	//Magazin magazin1;
-	//magazin1.afisare();
+	/*int i;
+	Magazin magazin1;
+	magazin1.afisare();
 
 	char* numemagazin = new char[strlen("Diverta") + 1];
 	strcpy_s(numemagazin, strlen("Diverta") + 1, "Diverta");
@@ -816,16 +957,16 @@ void main()
 	produseVandute[1] = "manual";
 	produseVandute[2] = "pix";
 	Magazin magazin2(2, numemagazin, "Unirii", 3, produseVandute);
-	//magazin2.afisare();
-	//delete[]numemagazin;
-	//delete[]produseVandute;
+	magazin2.afisare();
+	delete[]numemagazin;
+	delete[]produseVandute;
 
-	//Magazin magazin3("Doamnei");
-	//magazin3.afisare();
+	Magazin magazin3("Doamnei");
+	magazin3.afisare();
 
 
-	/*Client client1;
-	client1.afisare();
+	Client client1;
+	client1.afisare();*/
 
 	string* produseComandate = new string[3];
 	produseComandate[0] = "carte";
@@ -836,8 +977,8 @@ void main()
 	cantitateProduseComandate[1] = 5;
 	cantitateProduseComandate[2] = 10;
 	Client client2("Ion", 3, produseComandate, cantitateProduseComandate);
-	client2.afisare();
-	delete[]produseComandate;
+	//client2.afisare();
+	/*delete[]produseComandate;
 	delete[]cantitateProduseComandate;
 
 
@@ -845,12 +986,12 @@ void main()
 	client3.afisare();
 
 	ProdusComandat produs1;
-	produs1.afisare();
+	produs1.afisare();*/
 
 	char* numeProdus = new char[strlen("caiet") + 1];
 	strcpy_s(numeProdus, strlen("caiet") + 1, "caiet");
 	ProdusComandat produs2(31, numeProdus, "Diverta", 30.5, 15, 2.65);
-	produs2.afisare();
+	/*produs2.afisare();
 	delete[]numeProdus;
 
 	ProdusComandat produs3(25.6, 4);
@@ -979,6 +1120,7 @@ void main()
 	++produs3;
 	produs3.afisare();
 
+
 	Magazin* vectorMagazine = new Magazin[3];
 	for (i = 0; i < 3; i++)
 		cin >> vectorMagazine[i];
@@ -992,6 +1134,7 @@ void main()
 	for (i = 0; i < 2; i++)
 		cout << vectorClienti[i];
 	delete[]vectorClienti;
+
 
 	ProdusComandat* vectorProduse = new ProdusComandat[4];
 	for (i = 0; i < 4; i++)
@@ -1011,25 +1154,68 @@ void main()
 			cout << matriceProduse[i][j];
 	for (i = 0; i < 3; i++)
 		delete[]matriceProduse[i];
-	delete[]matriceProduse;*/
-	Furnizor f;
-	cout << f;
+	delete[]matriceProduse;
+
+
+	Furnizor furnizor1;
+	cout << furnizor1;
 	string* produse = new string[2]{ "caiet", "manual" };
-	Furnizor f1("Omega", magazin2, 2, produse);
-	cout << f1;
+	Furnizor furnizor2("Omega", magazin2, 2, produse);
+	cout << furnizor2;
 	delete[]produse;
-	Furnizor f2 = f1;
-	cout << f2;
-	f = f2;
-	cout << f;
-	Furnizor f3;
-	f3 = f + f1;
-	cout << f3;
-	if (f3 < f1)
-		cout << "Furnizorul " << f1.getNumeFurnizor() << " furnizeaza mai multe produse."<< endl;
+	Furnizor furnizor3 = furnizor2;
+	cout << furnizor3;
+	furnizor1 = furnizor3;
+	cout << furnizor1;
+	Furnizor furnizor4;
+	furnizor4 = furnizor1 + furnizor2;
+	cout << furnizor4;
+	if (furnizor4 < furnizor2)
+		cout << "Furnizorul " << furnizor2.getNumeFurnizor() << " furnizeaza mai multe produse."<< endl;
 	else
-		cout << "Furnizorul " << f3.getNumeFurnizor() << " furnizeaza mai multe produse."<< endl;
-	Furnizor f4;
-	f4.setMagazin(magazin2);
-	cout << f4.getMagazin();
+		cout << "Furnizorul " << furnizor4.getNumeFurnizor() << " furnizeaza mai multe produse."<< endl;
+	Furnizor furnizor5;
+	furnizor5.setMagazin(magazin2);
+	cout << furnizor5.getMagazin();
+
+
+	ofstream f1("Magazine.txt", ios::out);
+	f1 << magazin2;
+	f1.close();
+
+	ifstream f2("Magazine.txt", ios::in);
+	Magazin magazin5;
+	f2 >> magazin5;
+	f2.close();
+	cout << magazin5;
+	
+	ofstream f3("Furnizori.txt", ios::out);
+	f3 << furnizor2;
+	f3.close();
+	
+	ifstream f4("Furnizori.txt", ios::in);
+	Furnizor furnizor6;
+	f4 >> furnizor6;
+	f4.close();
+	cout << furnizor6;*/
+
+	//fstream f5("Clienti.dat", ios::binary | ios::out);
+	//client2.scrieInFisierBinar(f5);
+	//f5.close();
+
+	//Client client6;
+	//fstream f6("Clienti.dat", ios::binary | ios::in);
+	//client6.citesteDinFisierBinar(f6);
+	//f6.close();
+	//cout << client6;
+
+	fstream f7("Produse.dat", ios::binary | ios::out);
+	produs2.scrieInFisierBinar(f7);
+	f7.close();
+
+	fstream f8("Produse.dat", ios::binary | ios::in);
+	ProdusComandat produs5;
+	produs5.citireDinFisierBinar(f8);
+	cout << produs5;
+	
 }
