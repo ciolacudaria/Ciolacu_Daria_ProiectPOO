@@ -537,6 +537,104 @@ public:
 
 int Client::numarClienti = 0;
 
+class ClientFidel : public Client {
+private:
+	int nivelFidelitate;
+	int reducere;
+	int totalComenziPlasate;
+	int* puncteAdunatePerComanda;
+public:
+	ClientFidel() :Client() {
+		this->nivelFidelitate = 1;
+		this->reducere = 5;
+		this->totalComenziPlasate = 5;
+		this->puncteAdunatePerComanda = new int[this->totalComenziPlasate] {200, 300, 499, 125, 433};
+
+	}
+	ClientFidel(int nivelFidelitate, int reducere, int numarComenziPlasate, int* puncteAdunate, string nume, bool tipClient) :Client(nume, tipClient) {
+		this->nivelFidelitate = nivelFidelitate;
+		this->reducere = reducere;
+		this->totalComenziPlasate = numarComenziPlasate;
+		this->puncteAdunatePerComanda = new int[this->totalComenziPlasate];
+		for (int i = 0; i < this->totalComenziPlasate; i++)
+			this->puncteAdunatePerComanda[i] = puncteAdunate[i];
+	}
+
+	ClientFidel(const ClientFidel& cf) :Client(cf) {
+		this->nivelFidelitate = cf.nivelFidelitate;
+		this->reducere = cf.reducere;
+		this->totalComenziPlasate = cf.totalComenziPlasate;
+		this->puncteAdunatePerComanda = new int[this->totalComenziPlasate];
+		for (int i = 0; i < this->totalComenziPlasate; i++)
+			this->puncteAdunatePerComanda[i] = cf.puncteAdunatePerComanda[i];
+	}
+
+	~ClientFidel() {
+		if (this->puncteAdunatePerComanda != NULL)
+			delete[]this->puncteAdunatePerComanda;
+	}
+
+	int getNivelFidelitate() {
+		return this->nivelFidelitate;
+	}
+
+	void setNivelFidelitate(int nivelFidelitate) {
+		this->nivelFidelitate = nivelFidelitate;
+	}
+
+	int getReducere() {
+		return this->reducere;
+	}
+
+	void setReducere(int reducere) {
+		this->reducere = reducere;
+	}
+
+	int getTotalComenziPlasate() {
+		return this->totalComenziPlasate;
+	}
+
+	int getPuncteAdunatePerComanda(int i) {
+		if (i >= 0 && i < this->totalComenziPlasate)
+			return this->puncteAdunatePerComanda[i];
+	}
+
+	void setPuncteAdunate(int nrComenzi, int* puncte) {
+		if (nrComenzi >0) {
+			this->totalComenziPlasate = nrComenzi;
+			if (this->puncteAdunatePerComanda != NULL)
+				delete[]this->puncteAdunatePerComanda;
+			this->puncteAdunatePerComanda = new int[this->totalComenziPlasate];
+			for (int i = 0; i < this->totalComenziPlasate; i++)
+				this->puncteAdunatePerComanda[i] = puncte[i];
+		}
+	}
+
+	const ClientFidel& operator=(const ClientFidel& cf) {
+		if (this != &cf) {
+			(Client&)*this = (Client&)cf;
+			this->nivelFidelitate = cf.nivelFidelitate;
+			this->reducere = cf.reducere;
+			this->totalComenziPlasate = cf.totalComenziPlasate;
+			if (this->puncteAdunatePerComanda != NULL)
+				delete[]this->puncteAdunatePerComanda;
+			this->puncteAdunatePerComanda = new int[this->totalComenziPlasate];
+			for (int i = 0; i < this->totalComenziPlasate; i++)
+				this->puncteAdunatePerComanda[i] = cf.puncteAdunatePerComanda[i];
+		}
+		return *this;
+	}
+
+	friend ostream& operator<<(ostream& os, const ClientFidel& cf) {
+		os << (Client&)cf;
+		os << " Nivelul de fidelitate al clientului este de " << cf.nivelFidelitate << ", fapt ce ii aduce o reducere de " << cf.reducere << "%. De-a lungul timpului, el a comandat " << cf.totalComenziPlasate << " comenzi, pentru care a acumulat urmatoarele puncte: " << endl;
+		for (int i = 0; i < cf.totalComenziPlasate; i++)
+			os << "Din comanda " << i + 1 << " a acumulat " << cf.puncteAdunatePerComanda[i] << " puncte." << endl;
+		os << endl;
+		return os;
+	}
+
+};
 
 
 class ProdusComandat {
@@ -652,7 +750,7 @@ public:
 	}
 
 	void afisare() {
-		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul " << numeMagazin << ". In total au fost inregistrate " << nrProduseComandate << " produse." << endl;
+		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El mai este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul " << numeMagazin << ". In total au fost inregistrate " << nrProduseComandate << " produse." << endl;
 	}
 
 	static void cateProduseComandate() {
@@ -713,7 +811,7 @@ public:
 
 	friend ostream& operator<<(ostream& monitor, const ProdusComandat& produs)
 	{
-		monitor << "Produsul " << produs.numeProdus << " are id-ul " << produs.idProdus << ", pretul de " << produs.pretProdus << " lei si greutatea de " << produs.greutateProdus << " kg. El este disponibil in numar de " << produs.cantitateDisponibila << " bucati si este distribuit de magazinul " << produs.numeMagazin << ". In total au fost inregistrate " << produs.nrProduseComandate << " produse." << endl;
+		monitor << "Produsul " << produs.numeProdus << " are id-ul " << produs.idProdus << ", pretul de " << produs.pretProdus << " lei si greutatea de " << produs.greutateProdus << " kg. El mai este disponibil in numar de " << produs.cantitateDisponibila << " bucati si este distribuit de magazinul " << produs.numeMagazin << ". In total au fost inregistrate " << produs.nrProduseComandate << " produse." << endl;
 		return monitor;
 	}
 
@@ -758,6 +856,73 @@ public:
 };
 
 int ProdusComandat::nrProduseComandate = 0;
+
+class ProdusComandatRedus : public ProdusComandat {
+private:
+	int procentDiscount;
+	char* dataDeExpirareApropiata;
+public:
+	ProdusComandatRedus() :ProdusComandat() {
+		this->procentDiscount = 30;
+		this->dataDeExpirareApropiata = new char[strlen("01.01.2024") + 1];
+		strcpy_s(this->dataDeExpirareApropiata, strlen("01.01.2024") + 1, "01.01.2024");
+	}
+
+	ProdusComandatRedus(int procentDiscount, char* dataExpirareApropiata, float pretProdus, int cantitateDisponibila) : ProdusComandat(pretProdus, cantitateDisponibila) {
+		this->procentDiscount = procentDiscount;
+		this->dataDeExpirareApropiata = new char[strlen(dataExpirareApropiata) + 1];
+		strcpy_s(this->dataDeExpirareApropiata, strlen(dataExpirareApropiata) + 1, dataExpirareApropiata);
+	}
+
+	ProdusComandatRedus(const ProdusComandatRedus& p) :ProdusComandat(p) {
+		this->procentDiscount = p.procentDiscount;
+		this->dataDeExpirareApropiata = new char[strlen(p.dataDeExpirareApropiata) + 1];
+		strcpy_s(this->dataDeExpirareApropiata, strlen(p.dataDeExpirareApropiata) + 1, p.dataDeExpirareApropiata);
+	}
+
+	~ProdusComandatRedus() {
+		if (this->dataDeExpirareApropiata != NULL)
+			delete[]this->dataDeExpirareApropiata;
+	}
+
+	int getProcentDiscount() {
+		return this->procentDiscount;
+	}
+
+	void setProcentDiscount(int procentDiscount) {
+		this->procentDiscount = procentDiscount;
+	}
+
+	char* getDataExpriare() {
+		return this->dataDeExpirareApropiata;
+	}
+
+	void setDataExpirare(char* dataDeExpirare) {
+		if (this->dataDeExpirareApropiata != NULL)
+			delete[]this->dataDeExpirareApropiata;
+		this->dataDeExpirareApropiata = new char[strlen(dataDeExpirare) + 1];
+		strcpy_s(this->dataDeExpirareApropiata, strlen(dataDeExpirare) + 1, dataDeExpirare);
+	}
+
+	const ProdusComandatRedus& operator=(const ProdusComandatRedus& p) {
+		if (this != &p) {
+			(ProdusComandat&)*this = (ProdusComandat&)p;
+			this->procentDiscount = p.procentDiscount;
+			if (this->dataDeExpirareApropiata != NULL)
+				delete[]this->dataDeExpirareApropiata;
+			this->dataDeExpirareApropiata = new char[strlen(p.dataDeExpirareApropiata) + 1];
+			strcpy_s(this->dataDeExpirareApropiata, strlen(p.dataDeExpirareApropiata) + 1, p.dataDeExpirareApropiata);
+		}
+		return *this;
+	}
+
+	friend ostream& operator<<(ostream& os, const ProdusComandatRedus& p) {
+		os << (ProdusComandat&)p;
+		os << "Data de expirare a produsului este de " << p.dataDeExpirareApropiata << " si din aceasta cauza i s-a aplicat un procent de discount de " << p.procentDiscount << "%." << endl;
+		return os;
+	}
+
+};
 
 class Furnizor {
 private:
@@ -946,7 +1111,7 @@ void AdaugaProdus(Magazin& magazin, string produs)
 
 void main()
 {
-	/*int i;
+	int i;
 	Magazin magazin1;
 	magazin1.afisare();
 
@@ -966,7 +1131,7 @@ void main()
 
 
 	Client client1;
-	client1.afisare();*/
+	client1.afisare();
 
 	string* produseComandate = new string[3];
 	produseComandate[0] = "carte";
@@ -977,8 +1142,8 @@ void main()
 	cantitateProduseComandate[1] = 5;
 	cantitateProduseComandate[2] = 10;
 	Client client2("Ion", 3, produseComandate, cantitateProduseComandate);
-	//client2.afisare();
-	/*delete[]produseComandate;
+	client2.afisare();
+	delete[]produseComandate;
 	delete[]cantitateProduseComandate;
 
 
@@ -986,12 +1151,12 @@ void main()
 	client3.afisare();
 
 	ProdusComandat produs1;
-	produs1.afisare();*/
+	produs1.afisare();
 
 	char* numeProdus = new char[strlen("caiet") + 1];
 	strcpy_s(numeProdus, strlen("caiet") + 1, "caiet");
 	ProdusComandat produs2(31, numeProdus, "Diverta", 30.5, 15, 2.65);
-	/*produs2.afisare();
+	produs2.afisare();
 	delete[]numeProdus;
 
 	ProdusComandat produs3(25.6, 4);
@@ -1197,17 +1362,17 @@ void main()
 	Furnizor furnizor6;
 	f4 >> furnizor6;
 	f4.close();
-	cout << furnizor6;*/
+	cout << furnizor6;
 
-	//fstream f5("Clienti.dat", ios::binary | ios::out);
-	//client2.scrieInFisierBinar(f5);
-	//f5.close();
+	fstream f5("Clienti.dat", ios::binary | ios::out);
+	client2.scrieInFisierBinar(f5);
+	f5.close();
 
-	//Client client6;
-	//fstream f6("Clienti.dat", ios::binary | ios::in);
-	//client6.citesteDinFisierBinar(f6);
-	//f6.close();
-	//cout << client6;
+	Client client6;
+	fstream f6("Clienti.dat", ios::binary | ios::in);
+	client6.citesteDinFisierBinar(f6);
+	f6.close();
+	cout << client6;
 
 	fstream f7("Produse.dat", ios::binary | ios::out);
 	produs2.scrieInFisierBinar(f7);
@@ -1217,5 +1382,39 @@ void main()
 	ProdusComandat produs5;
 	produs5.citireDinFisierBinar(f8);
 	cout << produs5;
-	
+
+	ProdusComandatRedus produsRedus1;
+	cout << produsRedus1;
+	char* data_expirare = new char[strlen("20.12.2023") +1];
+	strcpy_s(data_expirare, strlen("20.12.2023") + 1, "20.12.2023");
+	ProdusComandatRedus produsRedus2(10, data_expirare, 20.2, 10);
+	cout << produsRedus2;
+	ProdusComandatRedus produsRedus3 = produsRedus1;
+	cout << produsRedus3;
+	produsRedus3 = produsRedus2;
+	cout << produsRedus3;
+	produsRedus1.setProcentDiscount(30);
+	produsRedus1.setDataExpirare(data_expirare);
+	cout << produsRedus1.getProcentDiscount() << endl << produsRedus1.getDataExpriare() << endl;
+	ProdusComandat produs6 = produsRedus3;
+	cout << produs6;
+	delete[]data_expirare;
+
+	ClientFidel clientFidel1;
+	cout << clientFidel1;
+	int* puncteAdunate = new int[3] {200, 500, 1000};
+	ClientFidel clientFidel2(2, 20, 3, puncteAdunate, "Ioana", 0);
+	cout << clientFidel2;
+	delete[]puncteAdunate;
+	ClientFidel clientFidel3 = clientFidel2;
+	cout << clientFidel3;
+	clientFidel1 = clientFidel3;
+	cout << clientFidel1;
+	clientFidel1.setNivelFidelitate(3);
+	int* puncte = new int[4] {500, 600, 200, 1500};
+	clientFidel1.setPuncteAdunate(4, puncte);
+	delete[]puncte;
+	cout << clientFidel1.getNivelFidelitate() << endl << clientFidel1.getPuncteAdunatePerComanda(1) << endl;
+	Client client7 = clientFidel1;
+	cout << client7;
 }
