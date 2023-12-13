@@ -6,8 +6,25 @@ using namespace std;
 
 class ProdusComandat;
 class Furnizor;
+class FurnizorAbstract;
 
-class Magazin
+class AfisareLaConsola {
+public:
+	virtual void afisareLaConsola()=0;
+};
+
+class CentruComercial {
+public:
+	virtual char* citesteNume() = 0;
+	virtual void modificaNume(char* nume) = 0;
+	virtual int preiaNumarProduse() = 0;
+	friend FurnizorAbstract;
+	friend ostream& operator<<(ostream& ost, const FurnizorAbstract& f);
+	friend ifstream& operator>>(ifstream& in, FurnizorAbstract& f);
+
+};
+
+class Magazin: public CentruComercial
 {
 private:
 	static string localizare;
@@ -232,13 +249,26 @@ public:
 	}
 
 	friend Furnizor;
+
+	char* citesteNume() {
+		return this->numeMagazin;
+	}
+	void modificaNume(char* numeMagazin) {
+		if (this->numeMagazin != NULL)
+			delete[]this->numeMagazin;
+		this->numeMagazin = new char[strlen(numeMagazin) + 1];
+		strcpy_s(this->numeMagazin, strlen(numeMagazin) + 1, numeMagazin);
+	}
+	int preiaNumarProduse() {
+		return this->numarProduseVandute;
+	}
 };
 
 string Magazin::localizare = "Pamant";
 
 
 
-class Client {
+class Client : public AfisareLaConsola{
 private:
 	static int numarClienti;
 	const int idClient;
@@ -533,6 +563,24 @@ public:
 		f.read((char*)&this->tipClient, sizeof(bool));
 	}
 
+	void afisareLaConsola() {
+		int i;
+		cout << "Clientul " << this->numeClient << ", are id-ul " << this->idClient << ", a comandat " << this->numarProduseComandate << " produse: ";
+		if (this->numarProduseComandate == 0)
+			cout << "-";
+		else {
+			for (i = 0; i < this->numarProduseComandate; i++)
+				cout << this->produseComandate[i] << " ";
+			cout << ", in urmatoarele cantitati: ";
+			for (i = 0; i < this->numarProduseComandate; i++)
+				cout << this->cantitatiProduseComandate[i] << " ";
+		}
+		if (this->tipClient == true)
+			cout << ". Clientul este persoana fizica.";
+		else
+			cout << ". Clientul este persoana juridica.";
+		cout << "In total, sunt " << numarClienti << " clienti." << endl;
+	}
 };
 
 int Client::numarClienti = 0;
@@ -637,7 +685,7 @@ public:
 };
 
 
-class ProdusComandat {
+class ProdusComandat : public AfisareLaConsola{
 private:
 	static int nrProduseComandate;
 	const int idProdus;
@@ -853,6 +901,10 @@ public:
 		f.read((char*)&this->greutateProdus, sizeof(float));
 	}
 
+	void afisareLaConsola() {
+		cout << "Produsul " << numeProdus << " are id-ul " << idProdus << ", pretul de " << pretProdus << " lei si greutatea de " << greutateProdus << " kg. El mai este disponibil in numar de " << cantitateDisponibila << " bucati si este distribuit de magazinul " << numeMagazin << ". In total au fost inregistrate " << nrProduseComandate << " produse." << endl;
+	}
+
 };
 
 int ProdusComandat::nrProduseComandate = 0;
@@ -924,7 +976,8 @@ public:
 
 };
 
-class Furnizor {
+
+class Furnizor : public AfisareLaConsola {
 private:
 	const int idFurnizor;
 	string numeFurnizor;
@@ -1028,7 +1081,7 @@ public:
 			ost << f.produseFurnizate[i] << " ";
 		ost << ". " << endl;
 		return ost;
-	}
+	} 
 
 	Furnizor operator+(const Furnizor& f) {
 		Furnizor aux = *this;
@@ -1069,7 +1122,163 @@ public:
 			in >> f.produseFurnizate[i];
 		return in;
 	}
+
+	void afisareLaConsola() {
+		cout<< "Furnizorul " << numeFurnizor << " are id-ul " << idFurnizor << " si furnizeaza " << numarProduseFurnizate << " produse pentru magazinul " << magazin.getNumeMagazin() << ". El furnizeaza urmatoarele produse: ";
+		for (int i = 0; i < numarProduseFurnizate; i++)
+			cout << produseFurnizate[i] << " ";
+		cout<< ". " << endl;
+	}
+	
 };
+
+
+class FurnizorAbstract : public AfisareLaConsola {
+private:
+	const int idFurnizor;
+	string numeFurnizor;
+	CentruComercial* centruComercial;
+	int numarProduseFurnizate;
+	string* produseFurnizate;
+
+public:
+	FurnizorAbstract() :idFurnizor(0) {
+		this->numeFurnizor = "No Name";
+		this->numarProduseFurnizate = 0;
+		this->produseFurnizate = NULL;
+		this->centruComercial = new Magazin();
+	}
+
+	FurnizorAbstract(string nume, int nrProduseFurnizate, string* produse) :idFurnizor(2) {
+		this->numeFurnizor = nume;
+		this->centruComercial = new Magazin();
+		if (nrProduseFurnizate <= centruComercial->preiaNumarProduse())
+		{
+			this->numarProduseFurnizate = nrProduseFurnizate;
+			this->produseFurnizate = new string[this->numarProduseFurnizate];
+			for (int i = 0; i < this->numarProduseFurnizate; i++)
+			{
+				this->produseFurnizate[i] = produse[i];
+			}
+
+		}
+	}
+
+	FurnizorAbstract(const FurnizorAbstract& f) :idFurnizor(f.idFurnizor) {
+		this->numeFurnizor = f.numeFurnizor;
+		this->numarProduseFurnizate = f.numarProduseFurnizate;
+		this->produseFurnizate = new string[this->numarProduseFurnizate];
+		for (int i = 0; i < this->numarProduseFurnizate; i++)
+			this->produseFurnizate[i] = f.produseFurnizate[i];
+	}
+
+	~FurnizorAbstract() {
+		if (this->produseFurnizate != NULL)
+			delete[]this->produseFurnizate;
+	}
+
+	const int getIdFurnizor() {
+		return this->idFurnizor;
+	}
+
+	string getNumeFurnizor() {
+		return this->numeFurnizor;
+	}
+
+	void setNumeFurnizor(string nume) {
+		this->numeFurnizor = nume;
+	}
+
+	int getNrProduseFurnizate() {
+		return this->numarProduseFurnizate;
+	}
+
+	string getProdusFurnizat(int i) {
+		if (i >= 0 && i < this->numarProduseFurnizate)
+			return this->produseFurnizate[i];
+	}
+
+	void setProduseFurnizate(int nrProd, string* prod) {
+		if (nrProd > 0) {
+			this->numarProduseFurnizate = nrProd;
+			if (this->produseFurnizate != NULL)
+				delete[]this->produseFurnizate;
+			this->produseFurnizate = new string[this->numarProduseFurnizate];
+			for (int i = 0; i < this->numarProduseFurnizate; i++)
+				this->produseFurnizate[i] = prod[i];
+		}
+	}
+
+	const FurnizorAbstract& operator=(const FurnizorAbstract& f) {
+		if (this != &f) {
+			this->numeFurnizor = f.numeFurnizor;
+			this->numarProduseFurnizate = f.numarProduseFurnizate;
+			if (this->produseFurnizate != NULL)
+				delete[]this->produseFurnizate;
+			this->produseFurnizate = new string[this->numarProduseFurnizate];
+			for (int i = 0; i < this->numarProduseFurnizate; i++)
+				this->produseFurnizate[i] = f.produseFurnizate[i];
+		}
+		return *this;
+	}
+
+	friend ostream& operator<<(ostream& ost, const FurnizorAbstract& f) {
+		ost << "Furnizorul " << f.numeFurnizor << " are id-ul " << f.idFurnizor << " si furnizeaza " << f.numarProduseFurnizate << " produse pentru magazinul " << f.centruComercial->citesteNume() << ". El furnizeaza urmatoarele produse: ";
+		for (int i = 0; i < f.numarProduseFurnizate; i++)
+			ost << f.produseFurnizate[i] << " ";
+		ost << ". " << endl;
+		return ost;
+	}
+
+	FurnizorAbstract operator+(const FurnizorAbstract& f) {
+		FurnizorAbstract aux = *this;
+		aux.numarProduseFurnizate = this->numarProduseFurnizate + f.numarProduseFurnizate;
+		if (aux.produseFurnizate != NULL)
+			delete[]aux.produseFurnizate;
+		aux.produseFurnizate = new string[aux.numarProduseFurnizate];
+		for (int i = 0; i < this->numarProduseFurnizate; i++)
+			aux.produseFurnizate[i] = this->produseFurnizate[i];
+		for (int i = this->numarProduseFurnizate; i < aux.numarProduseFurnizate; i++)
+			aux.produseFurnizate[i] = f.produseFurnizate[i - this->numarProduseFurnizate];
+		return aux;
+	}
+
+	bool operator<(const FurnizorAbstract& f) {
+		return this->numarProduseFurnizate < f.numarProduseFurnizate;
+	}
+
+	friend ofstream& operator<<(ofstream& out, const FurnizorAbstract& f) {
+		out << f.numeFurnizor << endl << f.numarProduseFurnizate << endl << f.centruComercial->citesteNume() << endl;
+		for (int i = 0; i < f.numarProduseFurnizate; i++)
+			out << f.produseFurnizate[i] << endl;
+		out << endl;
+		return out;
+	}
+
+
+	friend ifstream& operator>>(ifstream& in, FurnizorAbstract& f) {
+		in >> f.numeFurnizor;
+		in >> f.numarProduseFurnizate;
+		char numeMagazin[100];
+		in >> numeMagazin;
+		f.centruComercial->modificaNume(numeMagazin);
+		if (f.produseFurnizate != NULL)
+			delete[]f.produseFurnizate;
+		f.produseFurnizate = new string[f.numarProduseFurnizate];
+		for (int i = 0; i < f.numarProduseFurnizate; i++)
+			in >> f.produseFurnizate[i];
+		return in;
+	}
+
+	void afisareLaConsola() {
+		cout << "Furnizorul " << numeFurnizor << " are id-ul " << idFurnizor << " si furnizeaza " << numarProduseFurnizate << " produse pentru magazinul " << centruComercial->citesteNume() << ". El furnizeaza urmatoarele produse: ";
+		for (int i = 0; i < numarProduseFurnizate; i++)
+			cout << produseFurnizate[i] << " ";
+		cout << ". " << endl;
+	}
+
+};
+
 
 void inregistrareComandaNoua(Client& client, ProdusComandat& produs, int cantitate)
 {
@@ -1109,10 +1318,12 @@ void AdaugaProdus(Magazin& magazin, string produs)
 
 
 
+
+
 void main()
 {
 	int i;
-	Magazin magazin1;
+	/*Magazin magazin1;
 	magazin1.afisare();
 
 	char* numemagazin = new char[strlen("Diverta") + 1];
@@ -1416,5 +1627,25 @@ void main()
 	delete[]puncte;
 	cout << clientFidel1.getNivelFidelitate() << endl << clientFidel1.getPuncteAdunatePerComanda(1) << endl;
 	Client client7 = clientFidel1;
-	cout << client7;
+	cout << client7;*/
+
+	//FurnizorAbstract furnizorAbstract1;
+	//cout<<furnizorAbstract1;
+	//furnizorAbstract1.afisareLaConsola();
+
+	//AfisareLaConsola** vector = new AfisareLaConsola * [10];
+	//vector[0] = new Furnizor();
+	//vector[1] = new Client();
+	//vector[2] = new ProdusComandat();
+	//vector[3] = new FurnizorAbstract();
+	//vector[4] = new Client();
+	//vector[5] = new Furnizor();
+	//vector[6] = new ProdusComandat();
+	//vector[7] = new Furnizor();
+	//vector[8] = new Client();
+	//vector[9] = new FurnizorAbstract();
+	//vector[10] = new Client();
+	//for (i = 0; i < 10; i++)
+	//	vector[i]->afisareLaConsola();
+
 }
